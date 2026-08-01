@@ -73,7 +73,7 @@ function ReviewContent() {
       </div>
 
       <Card className="mt-5 p-4 sm:p-5">
-        <div className="grid grid-cols-8 gap-2 sm:grid-cols-12">
+        <div className="grid grid-cols-5 gap-2 sm:grid-cols-12">
           {questions.map((q, i) => {
             const cat = answers[q.id]?.category;
             return (
