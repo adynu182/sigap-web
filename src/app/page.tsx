@@ -83,7 +83,7 @@ export default function HomePage() {
             <Button variant="ghost" size="sm">Masuk</Button>
           </Link>
           <Link href="/register">
-            <Button size="sm">Daftarkan SPPG</Button>
+            <Button size="sm">Daftar</Button>
           </Link>
         </div>
       </header>
@@ -95,12 +95,10 @@ export default function HomePage() {
               141 klausul HACCP / GMP
             </span>
             <h1 className="font-display mt-4 text-4xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl">
-              Petakan kesenjangan kepatuhan dapur SPPG Anda, klausul demi klausul.
+              Petakan kesenjangan kepatuhan dapur SPPG Anda.
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-ink-soft">
-              SIGAP menuntun tim SPPG mengisi self-assessment keamanan pangan satu
-              klausul per layar, melampirkan bukti foto, lalu menghasilkan peta
-              gap dan laporan yang siap diekspor — langsung dari ponsel.
+              SIGAP menuntun tim SPPG mengisi self-assessment keamanan pangan, melampirkan bukti foto, lalu menghasilkan peta gap dan laporan yang siap diekspor.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link href="/register">

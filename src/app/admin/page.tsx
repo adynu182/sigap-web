@@ -133,7 +133,7 @@ function AdminDashboardContent() {
             <h2 className="font-display font-bold text-ink">Backup seluruh data</h2>
             <p className="mt-1 text-sm leading-relaxed text-ink-soft">
               Ekspor seluruh jawaban dari semua SPPG beserta daftar akun ke satu
-              berkas Excel, sebagai salinan cadangan di luar Firestore.
+              berkas Excel.
             </p>
             <Button onClick={handleBackupAll} loading={backingUp} className="mt-3" size="sm">
               Ekspor sekarang

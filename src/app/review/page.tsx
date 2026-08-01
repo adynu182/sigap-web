@@ -69,25 +69,34 @@ function ReviewContent() {
         <Legend tone="bg-conform" label={`Conformity (${summary.Conformity})`} />
         <Legend tone="bg-minor" label={`Minor (${summary.Minor})`} />
         <Legend tone="bg-major" label={`Major (${summary.Major})`} />
-        <Legend tone="bg-empty-soft border border-line" label={`Belum diisi (${summary.empty})`} />
+        <Legend tone="bg-empty-soft border border-line" label={`Belum (${summary.empty})`} />
       </div>
 
       <Card className="mt-5 p-4 sm:p-5">
         <div className="grid grid-cols-5 gap-2 sm:grid-cols-12">
           {questions.map((q, i) => {
-            const cat = answers[q.id]?.category;
+            const answer = answers[q.id];
+            const cat = answer?.category;
+            const hasComment = !!answer?.essay?.trim();
+
             return (
               <button
                 key={q.id}
                 onClick={() => router.push(`/assessment?i=${i}`)}
                 title={q.text}
                 className={cn(
-                  "tabular flex aspect-square items-center justify-center rounded-md text-[11px] font-bold text-white/90 transition-transform hover:scale-105 cursor-pointer",
+                  "tabular relative flex aspect-square items-center justify-center rounded-md text-[14px] font-bold text-white/80 transition-transform hover:scale-105 cursor-pointer",
                   CELL_TONE[cat ?? "empty"],
                   !cat && "text-ink-soft"
                 )}
               >
                 {q.order}
+                {hasComment && (
+                  <div
+                    className="absolute right-1 top-1 size-2 rounded-full bg-current opacity-70"
+                    title="Ada komentar/temuan"
+                  />
+                )}
               </button>
             );
           })}
