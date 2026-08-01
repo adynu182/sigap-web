@@ -14,6 +14,15 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/email-already-in-use": "Email ini sudah terdaftar. Coba masuk, atau gunakan email lain.",
   "auth/invalid-email": "Format email tidak valid.",
   "auth/weak-password": "Password minimal 6 karakter.",
+  "auth/operation-not-allowed":
+    "Sign-in method Email/Password belum diaktifkan di Firebase Console (Authentication → Sign-in method).",
+  "auth/unauthorized-domain":
+    "Domain ini belum diizinkan di Firebase Console (Authentication → Settings → Authorized domains).",
+  "auth/configuration-not-found":
+    "Konfigurasi Firebase Authentication tidak ditemukan. Pastikan Authentication sudah diaktifkan di Firebase Console.",
+  "auth/network-request-failed": "Koneksi bermasalah. Periksa internet, lalu coba lagi.",
+  "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
+    "API key Firebase tidak valid. Periksa kembali variabel lingkungan NEXT_PUBLIC_FIREBASE_*.",
 };
 
 export default function RegisterPage() {
@@ -54,7 +63,7 @@ export default function RegisterPage() {
       router.push("/pending");
     } catch (err) {
       if (err instanceof FirebaseError) {
-        setError(AUTH_ERROR_MESSAGES[err.code] ?? "Pendaftaran gagal. Coba lagi.");
+        setError(AUTH_ERROR_MESSAGES[err.code] ?? `Pendaftaran gagal (${err.code}). Coba lagi.`);
       } else {
         setError("Pendaftaran gagal. Coba lagi.");
       }

@@ -20,8 +20,8 @@ di tingkat gratis (Firebase Spark + Vercel Hobby).
 1. Buka [console.firebase.google.com](https://console.firebase.google.com) → **Add project** (gratis, tidak perlu kartu kredit untuk paket Spark).
 2. **Build → Authentication → Get started** → aktifkan sign-in method **Email/Password**.
 3. **Build → Firestore Database → Create database** → pilih **Production mode** → pilih region (mis. `asia-southeast2` / Jakarta).
-4. **Build → Storage → Get started** → pilih region yang sama.
-5. Di **Project settings → General → Your apps**, klik ikon web (`</>`) untuk mendaftarkan web app baru, lalu salin nilai `firebaseConfig` yang muncul.
+4. **(Opsional) Build → Storage** — sejak awal Februari 2026, Cloud Storage for Firebase mengharuskan paket **Blaze** (bayar sesuai pemakaian; pemakaian kecil tetap Rp 0, tapi wajib menautkan kartu). Kalau project Anda masih paket **Spark**, lewati langkah ini — aplikasi tetap berjalan penuh tanpa Storage, hanya fitur upload foto bukti yang otomatis disembunyikan.
+5. Di **Project settings → General → Your apps**, klik ikon web (`</>`) untuk mendaftarkan web app baru, lalu salin nilai `firebaseConfig` yang muncul. Kalau Anda melewati langkah Storage, biarkan `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` kosong di `.env.local` — sisanya tetap diisi seperti biasa.
 
 ## 2. Konfigurasi lokal
 
@@ -90,6 +90,16 @@ questions/{questionId}      -- daftar master 141 klausul (dikelola admin)
 
 ## Batasan versi uji coba ini
 
+- **Upload foto bukti butuh paket Blaze.** Sejak Februari 2026, Cloud Storage for Firebase tidak lagi tersedia di paket Spark (gratis) sama sekali. Kalau `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` kosong atau project masih Spark, aplikasi mendeteksi ini otomatis dan menyembunyikan tombol upload foto — fitur lain (assessment, approval, ekspor Excel) tetap berjalan penuh di paket gratis. Kalau ingin foto bukti tanpa upgrade ke Blaze, opsi lain: pakai layanan penyimpanan gambar gratis terpisah (mis. Cloudinary free tier) — beri tahu saya kalau mau saya bantu sambungkan.
 - Backup otomatis terjadwal belum ada — gunakan tombol **Ekspor** (per SPPG) atau **Backup semua data** (admin) secara manual. Untuk backup terjadwal, opsi berikutnya: Cloud Function + Cloud Scheduler, atau upgrade ke Firebase Blaze plan.
 - Foto lama tidak otomatis terhapus dari Storage saat diganti — cukup ringan untuk skala uji coba, tapi perlu dibersihkan berkala kalau volume foto besar.
 - Belum ada rate limiting / App Check di sisi Firebase — pertimbangkan mengaktifkan **App Check** sebelum dipakai lebih luas.
+
+## Kalau registrasi/login gagal
+
+Pesan error sekarang menyertakan kode aslinya (mis. `auth/operation-not-allowed`), jadi biasanya sudah menunjukkan akar masalahnya langsung. Penyebab tersering:
+
+- **`auth/operation-not-allowed`** — sign-in method Email/Password belum diaktifkan (Authentication → Sign-in method).
+- **`auth/unauthorized-domain`** — domain Vercel Anda belum ditambahkan ke Authentication → Settings → Authorized domains.
+- **`auth/configuration-not-found`** — Authentication belum pernah diaktifkan sama sekali di project ini.
+- Storage yang belum aktif **tidak lagi** menyebabkan registrasi/login gagal (sudah diperbaiki agar keduanya independen satu sama lain).

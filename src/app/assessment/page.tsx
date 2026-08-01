@@ -28,7 +28,7 @@ import { Card } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useAuth } from "@/context/AuthProvider";
-import { db, storage } from "@/lib/firebase";
+import { db, storage, isStorageConfigured } from "@/lib/firebase";
 import { Answer, Category, Question } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -121,7 +121,7 @@ function AssessmentContent() {
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !user || !current) return;
+    if (!file || !user || !current || !storage) return;
     setUploading(true);
     try {
       const path = `evidence/${user.uid}/${current.id}-${Date.now()}-${file.name}`;
@@ -129,6 +129,9 @@ function AssessmentContent() {
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       await persist({ photoUrl: url });
+    } catch (err) {
+      console.error("Upload foto gagal:", err);
+      alert("Gagal mengunggah foto. Periksa koneksi, lalu coba lagi.");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -217,41 +220,48 @@ function AssessmentContent() {
 
         <div className="mt-4">
           <label className="text-sm font-medium text-ink">Bukti foto</label>
-          <div className="mt-1.5 flex items-center gap-3">
-            {currentAnswer?.photoUrl ? (
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentAnswer.photoUrl}
-                  alt="Bukti foto temuan"
-                  className="size-20 rounded-xl border border-line object-cover"
-                />
-                <label className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-ink text-white cursor-pointer">
-                  <Camera className="size-3.5" />
-                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
+          {!isStorageConfigured() ? (
+            <p className="mt-1.5 rounded-xl bg-paper p-3 text-xs leading-relaxed text-ink-soft">
+              Upload foto belum aktif untuk project ini (Firebase Storage memerlukan paket
+              Blaze). Catatan temuan di atas tetap bisa diisi seperti biasa.
+            </p>
+          ) : (
+            <div className="mt-1.5 flex items-center gap-3">
+              {currentAnswer?.photoUrl ? (
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentAnswer.photoUrl}
+                    alt="Bukti foto temuan"
+                    className="size-20 rounded-xl border border-line object-cover"
+                  />
+                  <label className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-ink text-white cursor-pointer">
+                    <Camera className="size-3.5" />
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
+                  </label>
+                </div>
+              ) : (
+                <label className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line text-ink-soft hover:border-brand hover:text-brand">
+                  {uploading ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="size-5" />
+                      <span className="text-[10px]">Ambil foto</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handlePhoto}
+                    disabled={uploading}
+                  />
                 </label>
-              </div>
-            ) : (
-              <label className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line text-ink-soft hover:border-brand hover:text-brand">
-                {uploading ? (
-                  <Loader2 className="size-5 animate-spin" />
-                ) : (
-                  <>
-                    <Camera className="size-5" />
-                    <span className="text-[10px]">Ambil foto</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={handlePhoto}
-                  disabled={uploading}
-                />
-              </label>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 

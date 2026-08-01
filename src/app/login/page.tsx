@@ -15,6 +15,13 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/user-not-found": "Email atau password salah.",
   "auth/wrong-password": "Email atau password salah.",
   "auth/too-many-requests": "Terlalu banyak percobaan. Coba lagi beberapa saat lagi.",
+  "auth/operation-not-allowed":
+    "Sign-in method Email/Password belum diaktifkan di Firebase Console (Authentication → Sign-in method).",
+  "auth/unauthorized-domain":
+    "Domain ini belum diizinkan di Firebase Console (Authentication → Settings → Authorized domains).",
+  "auth/configuration-not-found":
+    "Konfigurasi Firebase Authentication tidak ditemukan. Pastikan Authentication sudah diaktifkan di Firebase Console.",
+  "auth/network-request-failed": "Koneksi bermasalah. Periksa internet, lalu coba lagi.",
 };
 
 export default function LoginPage() {
@@ -34,7 +41,7 @@ export default function LoginPage() {
       router.push("/");
     } catch (err) {
       if (err instanceof FirebaseError) {
-        setError(AUTH_ERROR_MESSAGES[err.code] ?? "Gagal masuk. Coba lagi.");
+        setError(AUTH_ERROR_MESSAGES[err.code] ?? `Gagal masuk (${err.code}). Coba lagi.`);
       } else {
         setError("Gagal masuk. Coba lagi.");
       }

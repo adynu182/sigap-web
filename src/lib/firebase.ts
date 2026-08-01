@@ -15,23 +15,37 @@ const firebaseConfig = {
 // Firebase's client SDK is browser-only. Every consumer of auth/db/storage in
 // this app is a "use client" component that only touches them inside
 // useEffect/event handlers, so it's safe for these to be undefined during
-// server-side rendering / build-time prerendering. Initializing inside this
-// helper (instead of at module scope) keeps `app` a plain non-nullable
-// FirebaseApp for getAuth/getFirestore/getStorage, so TypeScript doesn't
-// need to deal with an `undefined` branch on every call.
-function initFirebaseClient() {
+// server-side rendering / build-time prerendering.
+//
+// Storage is initialized separately from Auth/Firestore and is allowed to
+// fail on its own: Firebase Cloud Storage now requires the Blaze (paid)
+// plan (enforced since Feb 2026), so a project on the free Spark plan may
+// have no usable storage bucket at all. If getStorage() throws here, Auth
+// and Firestore -- which don't need Storage and work fine on Spark -- must
+// keep working. `storage` becomes undefined and features that need it (the
+// photo-evidence upload) check `isStorageConfigured()` and degrade instead
+// of crashing.
+function initCore() {
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  return {
-    app,
-    auth: getAuth(app),
-    db: getFirestore(app),
-    storage: getStorage(app),
-  };
+  return { app, auth: getAuth(app), db: getFirestore(app) };
 }
 
-const client = typeof window !== "undefined" ? initFirebaseClient() : undefined;
+const core = typeof window !== "undefined" ? initCore() : undefined;
 
-export const auth = client?.auth as Auth;
-export const db = client?.db as Firestore;
-export const storage = client?.storage as FirebaseStorage;
-export default client?.app;
+let storageInstance: FirebaseStorage | undefined;
+if (core) {
+  try {
+    storageInstance = getStorage(core.app);
+  } catch (err) {
+    console.warn(
+      "Firebase Storage tidak tersedia (kemungkinan project masih di paket Spark, yang tidak lagi mendapat akses Cloud Storage gratis sejak Feb 2026). Fitur upload foto akan disembunyikan.",
+      err
+    );
+  }
+}
+
+export const auth = core?.auth as Auth;
+export const db = core?.db as Firestore;
+export const storage = storageInstance;
+export const isStorageConfigured = () => storageInstance !== undefined;
+export default core?.app;
