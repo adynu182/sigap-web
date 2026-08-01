@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/sppgProfiles/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && myProfile().role == 'admin'
+        && myProfile().status == 'approved';
+    }
+
+    function isApprovedSppg() {
+      return isSignedIn() && myProfile().status == 'approved';
+    }
+
+    match /sppgProfiles/{uid} {
+      // Anyone signed in may create ONLY their own profile, and only as a
+      // pending sppg account. Nobody can self-assign admin or approved status.
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'sppg'
+        && request.resource.data.status == 'pending';
+
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Owners may update their own profile but may not change their own
+      // role or status (that requires an admin). Admins may update anyone.
+      allow update: if isSignedIn() && (
+        (request.auth.uid == uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.status == resource.data.status)
+        || isAdmin()
+      );
+
+      allow delete: if false;
+
+      match /answers/{questionId} {
+        allow read, write: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      }
+    }
+
+    match /questions/{questionId} {
+      allow read: if isApprovedSppg() || isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}
