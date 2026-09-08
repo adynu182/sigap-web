@@ -85,7 +85,7 @@ function ReviewContent() {
                 onClick={() => router.push(`/assessment?i=${i}`)}
                 title={q.text}
                 className={cn(
-                  "tabular relative flex aspect-square items-center justify-center rounded-md text-[14px] font-bold text-white/80 transition-transform hover:scale-105 cursor-pointer",
+                  "tabular relative flex aspect-square items-center justify-center rounded-md text-[14px] font-bold text-black/80 transition-transform hover:scale-105 cursor-pointer",
                   CELL_TONE[cat ?? "empty"],
                   !cat && "text-ink-soft"
                 )}
